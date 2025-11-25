@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Documentación de API — Sistema EDI-301</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0 1.5rem 3rem;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    header { text-align: center; margin: 2rem 0; }
+    h1, h2, h3, h4 { color: #222; }
+    nav {
+      background: #f5f5f5; border: 1px solid #ddd;
+      padding: 1rem; margin-bottom: 2rem;
+    }
+    nav ul { list-style: none; padding-left: 0; }
+    nav li { margin-bottom: 0.3rem; }
+    nav a { text-decoration: none; color: #0066cc; }
+    nav a:hover { text-decoration: underline; }
+    section { margin-bottom: 2rem; }
+
+    /* Tablas */
+    table {
+      width: 100%; border-collapse: collapse;
+      margin-top: 1rem; margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+    }
+    th, td {
+      padding: 8px 12px; text-align: left;
+      border: 1px solid #ccc; vertical-align: top;
+    }
+    th {
+      background-color: #f0f0f0; font-weight: bold;
+    }
+    tbody tr:nth-child(even) {
+      background-color: #fafafa;
+    }
+
+    /* Código */
+    code, pre {
+      background: #f4f4f4;
+      padding: 0.3rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.92rem;
+    }
+    pre { overflow-x: auto; padding: 1rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Documentación de API — Sistema EDI-301</h1>
+  <p>Equipo de desarrollo EDI-301 — Universidad Linda Vista</p>
+</header>
+
+<nav>
+  <h2>Índice</h2>
+  <ul>
+    <li><a href="#sec1">1. Introducción</a>
+      <ul>
+        <li><a href="#sec1-1">1.1 Propósito</a></li>
+        <li><a href="#sec1-2">1.2 Alcance</a></li>
+        <li><a href="#sec1-3">1.3 Público objetivo</a></li>
+        <li><a href="#sec1-4">1.4 Convenciones generales</a></li>
+      </ul>
+    </li>
+    <li><a href="#sec2">2. Autenticación y seguridad</a></li>
+    <li><a href="#sec3">3. Manejo de errores</a></li>
+    <li><a href="#sec4">4. Recursos de la API</a>
+      <ul>
+        <li><a href="#users">4.1 Usuarios</a></li>
+        <li><a href="#families">4.2 Familias</a></li>
+        <li><a href="#posts">4.3 Publicaciones</a></li>
+        <li><a href="#events">4.4 Eventos</a></li>
+        <li><a href="#images">4.5 Imágenes</a></li>
+        <li><a href="#status">4.6 Endpoint de estado</a></li>
+      </ul>
+    </li>
+    <li><a href="#sec5">5. Paginación</a></li>
+    <li><a href="#sec6">6. Versionado de la API</a></li>
+    <li><a href="#sec7">7. Buenas prácticas para clientes</a></li>
+  </ul>
+</nav>
+
+<!-- =========================== -->
+<!-- 1. INTRODUCCIÓN -->
+<!-- =========================== -->
+<section id="sec1">
+  <h2>1. Introducción</h2>
+
+  <section id="sec1-1">
+    <h3>1.1 Propósito</h3>
+    <p>
+      Este documento describe la API REST utilizada por la aplicación móvil <strong>EDI-301</strong>.
+      Incluye endpoints, métodos, parámetros, respuestas y ejemplos de uso.
+    </p>
+  </section>
+
+  <section id="sec1-2">
+    <h3>1.2 Alcance</h3>
+    <p>Cubre:</p>
+    <ul>
+      <li>Autenticación (JWT).</li>
+      <li>Gestión de usuarios.</li>
+      <li>Familias EDI.</li>
+      <li>Eventos.</li>
+      <li>Publicaciones.</li>
+      <li>Imágenes (perfil y portada).</li>
+      <li>Manejo de errores y paginación.</li>
+    </ul>
+  </section>
+
+  <section id="sec1-3">
+    <h3>1.3 Público objetivo</h3>
+    <ul>
+      <li>Desarrolladores móviles (Flutter).</li>
+      <li>Desarrolladores backend.</li>
+      <li>TI de la Universidad Linda Vista.</li>
+    </ul>
+  </section>
+
+  <section id="sec1-4">
+    <h3>1.4 Convenciones generales</h3>
+    <ul>
+      <li><strong>Formato:</strong> JSON en todas las respuestas.</li>
+      <li><strong>Autenticación:</strong> `Authorization: Bearer &lt;token&gt;`.</li>
+      <li><strong>Códigos de estado:</strong> 200, 201, 400, 401, 403, 404, 500.</li>
+      <li><strong>Base URL QA:</strong> <code>https://qa.edi.ulv/api</code></li>
+      <li><strong>Base URL PROD:</strong> <code>https://edi.ulv/api</code></li>
+    </ul>
+  </section>
+</section>
+
+<!-- =========================== -->
+<!-- 2. AUTENTICACIÓN -->
+<!-- =========================== -->
+<section id="sec2">
+  <h2>2. Autenticación y seguridad</h2>
+
+  <h3>POST /auth/login</h3>
+  <p>Autentica al usuario y genera un token JWT.</p>
+
+  <pre>{
+  "email": "usuario@ulv.edu.mx",
+  "password": "MiContraseña123"
+}</pre>
+
+  <h4>Respuesta 200:</h4>
+  <pre>{
+  "ok": true,
+  "token": "<jwt_token>",
+  "user": {
+    "id": 12,
+    "nombre": "Juan Pérez",
+    "rol": "HIJO",
+    "familiaId": 3
+  }
+}</pre>
+
+  <h3>GET /auth/me</h3>
+  <p>Devuelve los datos del usuario autenticado.</p>
+
+  <h3>POST /auth/logout</h3>
+  <p>Opcional: invalida el token actual.</p>
+</section>
+
+<!-- =========================== -->
+<!-- 3. ERRORES -->
+<!-- =========================== -->
+<section id="sec3">
+  <h2>3. Manejo de errores</h2>
+
+  <pre>{
+  "ok": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "El campo 'email' es obligatorio"
+  },
+  "timestamp": "2025-11-24T12:00:00Z"
+}</pre>
+
+  <h3>Códigos:</h3>
+  <ul>
+    <li>200 OK</li>
+    <li>201 Created</li>
+    <li>400 Bad Request</li>
+    <li>401 Unauthorized</li>
+    <li>403 Forbidden</li>
+    <li>404 Not Found</li>
+    <li>500 Internal Server Error</li>
+  </ul>
+</section>
+
+<!-- =========================== -->
+<!-- 4. API -->
+<!-- =========================== -->
+<section id="sec4">
+  <h2>4. Recursos de la API</h2>
+
+  <!-- USUARIOS -->
+  <section id="users">
+    <h3>4.1 Usuarios</h3>
+
+    <h4>GET /users</h4>
+    <p>Lista usuarios (ADMIN).</p>
+
+<pre>{
+  "ok": true,
+  "data": [
+    { "id": 1, "nombre": "Coordinador", "rol": "ADMIN" }
+  ],
+  "pagination": { "page":1, "limit":20, "total":45 }
+}</pre>
+
+    <h4>POST /users</h4>
+<pre>{
+  "nombre": "María",
+  "email": "maria@ulv.edu.mx",
+  "password": "12345678",
+  "rol": "PADRE",
+  "familiaId": 3
+}</pre>
+  </section>
+
+  <!-- FAMILIAS -->
+  <section id="families">
+    <h3>4.2 Familias</h3>
+
+    <h4>GET /families</h4>
+<pre>{
+  "ok": true,
+  "data": [
+    {
+      "id": 3,
+      "nombre": "Familia Esperanza",
+      "padreId": 2
+    }
+  ]
+}</pre>
+
+    <h4>GET /families/{id}</h4>
+<pre>{
+  "ok": true,
+  "family": {
+    "id": 3,
+    "nombre": "Familia Esperanza",
+    "miembros": [
+      { "id": 12, "nombre": "Juan", "rol": "HIJO" }
+    ]
+  }
+}</pre>
+  </section>
+
+  <!-- POSTS -->
+  <section id="posts">
+    <h3>4.3 Publicaciones</h3>
+
+    <h4>GET /posts</h4>
+<pre>{
+  "ok": true,
+  "data": [
+    {
+      "id": 10,
+      "titulo": "Bienvenida",
+      "contenido": "Mensaje...",
+      "familiaId": 3
+    }
+  ]
+}</pre>
+
+    <h4>POST /posts</h4>
+<pre>{
+  "titulo": "Nueva reunión",
+  "contenido": "Viernes 7pm",
+  "familiaId": 3
+}</pre>
+  </section>
+
+  <!-- EVENTS -->
+  <section id="events">
+    <h3>4.4 Eventos</h3>
+
+    <h4>GET /events</h4>
+<pre>{
+  "ok": true,
+  "data": [
+    {
+      "id": 5,
+      "titulo": "Convocatoria",
+      "fechaInicio": "2025-09-01T18:00:00Z"
+    }
+  ]
+}</pre>
+
+    <h4>POST /events</h4>
+<pre>{
+  "titulo": "Cena",
+  "descripcion": "Cierre de semestre",
+  "fechaInicio": "2025-11-30T19:00:00Z",
+  "fechaFin": "2025-11-30T21:00:00Z",
+  "ubicacion": "Casa EDI"
+}</pre>
+  </section>
+
+  <!-- IMAGENES -->
+  <section id="images">
+    <h3>4.5 Imágenes y archivos</h3>
+
+    <h4>POST /families/{id}/images</h4>
+    <p>Sube foto de perfil o portada.</p>
+
+<code>Content-Type: multipart/form-data</code>
+
+<pre>{
+  "ok": true,
+  "url": "https://edi.ulv/img/families/3-cover.jpg"
+}</pre>
+  </section>
+
+  <!-- STATUS -->
+  <section id="status">
+    <h3>4.6 Endpoint de estado</h3>
+
+    <h4>GET /status</h4>
+<pre>{
+  "ok": true,
+  "version": "1.0.0",
+  "env": "prod"
+}</pre>
+  </section>
+
+</section>
+
+<!-- PAGINACIÓN -->
+<section id="sec5">
+  <h2>5. Paginación</h2>
+
+<pre>{
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 95
+  }
+}</pre>
+</section>
+
+<section id="sec6">
+  <h2>6. Versionado de la API</h2>
+  <p>Se recomienda utilizar rutas versionadas:</p>
+  <pre>https://edi.ulv/api/v1/...</pre>
+</section>
+
+<section id="sec7">
+  <h2>7. Buenas prácticas para clientes</h2>
+  <ul>
+    <li>Renovar token solo cuando sea necesario.</li>
+    <li>Manejar correctamente 401 / 403.</li>
+    <li>No almacenar contraseñas localmente.</li>
+    <li>Usar reintentos solo en errores de red.</li>
+  </ul>
+</section>
+
+</body>
+</html>
